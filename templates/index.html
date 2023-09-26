@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pokemon Selection</title>
+    <script>
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+        function kostil(){
+            var offset = document.getElementById("offsetInput").value;
+            var limit = document.getElementById("limitInput").value;
+            setCookie("offset", offset, 30);
+            setCookie("limit", limit, 30);
+        }
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function searchTable(event) {
+            event.preventDefault();
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("searchInput");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("tableBody");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 0; i < tr.length; i++) {
+                td = tr[i].getElementsByTagName("td")[0]; // Assuming the name column is the first column (index 0)
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+
+            var offset = document.getElementById("offsetInput").value;
+            var limit = document.getElementById("limitInput").value;
+            var search = document.getElementById("searchInput").value;
+            setCookie("offset", offset, 30);
+            setCookie("search", search, 30);
+            setCookie("limit", limit, 30);
+        }
+
+        function loadStoredValues() {
+            var offset = getCookie("offset");
+            var limit = getCookie("limit");
+            var search = getCookie("search")
+            if (offset) {
+                document.getElementById("offsetInput").value = offset;
+            }
+
+            if (limit) {
+                document.getElementById("limitInput").value = limit;
+            }
+            if(search){
+                document.getElementById("searchInput").value = search;
+            }
+        }
+    </script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body onload="loadStoredValues()">
+    <h1>Pokemon Selection</h1>
+
+    <form onsubmit="searchTable(event)">
+        <input type="text" id="searchInput" placeholder="Enter Pokémon name">
+        <button type="submit">Search</button>
+        <button type="button" onclick="denySearch()">Deny</button>
+    </form>
+
+    <form action="/pokemon" method="get", onsubmit="kostil()">
+        <label for="offsetInput">Offset:</label>
+        <input type="number" name="offset" id="offsetInput" placeholder="Enter Pokemon offset">
+        <label for="limitInput">Limit:</label>
+        <input type="number" name="limit" id="limitInput" placeholder="Enter Pokemon limit">
+        <button type="submit">Search</button>
+    </form>
+
+    <table id="tableBody">
+        <tr>
+            <th>Name</th>
+            <th>URL</th>
+        </tr>
+        {% for pokemon in alter_pokemons %}
+        <tr>
+            <td>{{ pokemon.name }}</td>
+            <td>{{ pokemon.url }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <script>
+        function denySearch() {
+            document.getElementById("searchInput").value = "";
+            var table = document.getElementById("tableBody");
+            var rows = table.getElementsByTagName("tr");
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].style.display = "";
+            }
+        }
+    </script>
+</body>
+</html>
