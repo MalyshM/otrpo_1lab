@@ -3,6 +3,306 @@
 <head>
     <title>Pokemon Selection</title>
     <script>
+        document.addEventListener("DOMContentLoaded", function (event) {
+            var totalElements = 1292; // Total number of elements
+            var elementsPerPage = 20; // Number of elements per page
+            var totalPages = Math.ceil(totalElements / elementsPerPage); // Total number of pages
+            var currentActivePage = 1; // Current active page
+            var paginationContainer = document.getElementById('paginationContainer');
+
+            function generatePaginationLinks(startPage, endPage) {
+                for (var i = startPage; i <= endPage; i++) {
+                    var liElement = document.createElement('li');
+                    var aElement = document.createElement('a');
+                    aElement.href = '#';
+                    aElement.textContent = i;
+                    aElement.classList.add('pagination-link');
+                    if (i === currentActivePage) {
+                        aElement.classList.add('active');
+                    }
+                    liElement.appendChild(aElement);
+                    paginationContainer.appendChild(liElement);
+                }
+            }
+
+            function updatePagination(startPage, endPage) {
+                paginationContainer.innerHTML = '';
+                generatePaginationLinks(startPage, endPage);
+
+                var paginationLinks = document.getElementsByClassName('pagination-link');
+                for (var j = 0; j < paginationLinks.length; j++) {
+                    paginationLinks[j].addEventListener('click', function (event) {
+                        event.preventDefault();
+
+                        var clickedPage = parseInt(this.textContent);
+                        if (clickedPage !== currentActivePage) {
+                            var activeLink = document.querySelector('.pagination .active a');
+                            if (activeLink) {
+                                activeLink.classList.remove('active');
+                            }
+                            this.classList.add('active');
+                            currentActivePage = clickedPage;
+
+                            var offset = (currentActivePage - 1) * elementsPerPage;
+                            var limit = elementsPerPage;
+                            fetchData(offset, limit);
+                        }
+                    });
+                }
+            }
+
+            function initializePagination() {
+                var startPage = 1;
+                var endPage = Math.min(totalPages, 11);
+                generatePaginationLinks(startPage, endPage);
+            }
+
+            initializePagination();
+
+            function handlePaginationClick(event) {
+                event.preventDefault();
+
+                var clickedPage = parseInt(this.textContent);
+                if (clickedPage === 1) {
+                    var startPage = 1;
+                    var endPage = Math.min(totalPages, 11);
+                    updatePagination(startPage, endPage);
+                } else if (clickedPage === totalPages) {
+                    var startPage = Math.max(1, totalPages - 10);
+                    var endPage = totalPages;
+                    updatePagination(startPage, endPage);
+                } else {
+                    if (clickedPage - currentActivePage > 0) {
+                        var startPage = Math.max(1, clickedPage - 5);
+                        var endPage = Math.min(totalPages, clickedPage + 5);
+                        updatePagination(startPage, endPage);
+                    } else {
+                        var startPage = Math.max(1, clickedPage - 5);
+                        var endPage = Math.min(totalPages, clickedPage + 5);
+                        updatePagination(startPage, endPage);
+                    }
+                }
+
+                var activeLink = document.querySelector('.pagination .active a');
+                if (activeLink) {
+                    activeLink.classList.remove('active');
+                }
+                this.classList.add('active');
+                currentActivePage = clickedPage;
+
+                var offset = (currentActivePage - 1) * elementsPerPage;
+                var limit = elementsPerPage;
+                fetchData(offset, limit);
+            }
+
+            paginationContainer.addEventListener('click', function (event) {
+                if (event.target.classList.contains('pagination-link')) {
+                    handlePaginationClick.call(event.target, event);
+                }
+            });
+        })
+
+        function createTable(data) {
+            // Get the table element by its ID
+            var table = document.getElementById('tableBody');
+            while (table.firstChild) {
+                table.firstChild.remove();
+            }
+            // Create the table header row
+            var headerRow = table.createTHead().insertRow();
+            var headers = ['Name', 'Height', 'HP', 'Attack', 'Defense', 'Speed', 'Picture', 'Choose'];
+            console.log(headers)
+            for (var i = 0; i < headers.length; i++) {
+                var headerCell = document.createElement('th');
+                headerCell.innerHTML = headers[i];
+                headerRow.appendChild(headerCell);
+            }
+
+            // Create and fill the table rows with data
+            for (var i = 0; i < data.length; i++) {
+                var rowData = data[i];
+                var row = table.insertRow();
+                var keys = Object.keys(rowData);
+                for (var j = 0; j < keys.length; j++) {
+                    var cell = row.insertCell();
+                    var key = keys[j];
+                    console.log(key)
+                    if (key === 'picture') {
+                        // Create an image element for the 'picture' key
+                        var img = document.createElement('img');
+                        img.src = rowData[key];
+                        cell.appendChild(img);
+                    } else if (key === 'name') {
+                        // Create an anchor element for the 'name' key
+                        var link = document.createElement('a');
+                        link.textContent = rowData[key];
+                        link.addEventListener('click', Api_search);
+                        cell.appendChild(link);
+                    } else if (key === 'choose') {
+                        // Create the "Choose" button
+                        console.log(key)
+                        var chooseBtn = document.createElement('button');
+                        chooseBtn.textContent = rowData[key];
+                        chooseBtn.addEventListener('click', function () {
+                            choosePokemon(rowData['name']);
+                        });
+                        cell.appendChild(chooseBtn);
+                    } else {
+                        cell.innerHTML = rowData[key];
+                    }
+                }
+            }
+        }
+
+        function choosePokemon(userPokemonName) {
+            // Perform the logic to choose the user's Pokemon and random Pokemon
+
+            // Generate a random Pokemon name (excluding the user's Pokemon)
+            var table = document.getElementById('tableBody');
+            var randomPokemonName = '';
+
+            // Create an array to store available Pokémon names
+            var availablePokemonNames = [];
+
+            // Iterate through the table rows to collect available Pokémon names
+            for (var i = 0; i < table.rows.length; i++) {
+                var rowData = table.rows[i].cells;
+                var pokemonName = rowData[0].textContent; // Assuming the Pokémon name is in the first cell
+
+                if (pokemonName !== userPokemonName) {
+                    availablePokemonNames.push(pokemonName);
+                }
+            }
+
+            // Select a random Pokémon name from the available options
+            if (availablePokemonNames.length > 0) {
+                var randomIndex = Math.floor(Math.random() * availablePokemonNames.length);
+                randomPokemonName = availablePokemonNames[randomIndex];
+            }
+
+            // Redirect to the '/battle' route with query parameters
+            window.location.href = '/battle?userPokemon=' + encodeURIComponent(userPokemonName) + '&randomPokemon=' + encodeURIComponent(randomPokemonName);
+        }
+
+        // Function to make the API request and render the table
+        async function fetchData(offset, limit) {
+            try {
+
+                // Make the API request
+                var response = await fetch(`/api/pagination?offset=${offset}&limit=${limit}`);
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                // Parse the response JSON
+                var data = await response.json();
+
+                // Create and fill the table
+                createTable(data);
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        }
+
+        function Api_search(event) {
+            event.preventDefault(); // Prevent form submission
+
+            var searchInput = document.getElementById('searchInput').value;
+            if (searchInput.trim() !== '') {
+                fetch('/api/search?name_to_find=' + encodeURIComponent(searchInput))
+                    .then(response => response.json())
+                    .then(data => {
+                        // Process and display the results
+                        displayResults(data);
+                    })
+                    .catch(error => {
+                        // Handle any errors
+                        console.error('Error:', error);
+                    });
+            }
+
+            var searchInput1 = this.textContent;
+            if (searchInput1.trim() !== '') {
+                fetch('/api/search?name_to_find=' + encodeURIComponent(searchInput1))
+                    .then(response => response.json())
+                    .then(data => {
+                        // Process and display the results
+                        displayResults(data);
+                    })
+                    .catch(error => {
+                        // Handle any errors
+                        console.error('Error:', error);
+                    });
+            }
+        }
+
+        function displayResults(dataList) {
+            var tableBody = document.getElementById('tableBody');
+
+            // Clear existing table rows
+            while (tableBody.firstChild) {
+                tableBody.firstChild.remove();
+            }
+
+            // Create table row with headers
+            var headerRow = document.createElement('tr');
+            var nameHeader = document.createElement('th');
+            nameHeader.textContent = 'Name';
+            headerRow.appendChild(nameHeader);
+            var heightHeader = document.createElement('th');
+            heightHeader.textContent = 'Height';
+            headerRow.appendChild(heightHeader);
+            var hpHeader = document.createElement('th');
+            hpHeader.textContent = 'HP';
+            headerRow.appendChild(hpHeader);
+            var attackHeader = document.createElement('th');
+            attackHeader.textContent = 'Attack';
+            headerRow.appendChild(attackHeader);
+            var defenseHeader = document.createElement('th');
+            defenseHeader.textContent = 'Defence';
+            headerRow.appendChild(defenseHeader);
+            var speedHeader = document.createElement('th');
+            speedHeader.textContent = 'Speed';
+            headerRow.appendChild(speedHeader);
+            var pictureHeader = document.createElement('th');
+            pictureHeader.textContent = 'Picture';
+            headerRow.appendChild(pictureHeader);
+
+            tableBody.appendChild(headerRow);
+
+            // Create table row with data
+            for (var i = 0; i < dataList.length; i++) {
+                var data = dataList[i];
+                var row = document.createElement('tr');
+                var nameCell = document.createElement('td');
+                nameCell.textContent = data.name;
+                row.appendChild(nameCell);
+                var heightCell = document.createElement('td');
+                heightCell.textContent = data.height;
+                row.appendChild(heightCell);
+                var hpCell = document.createElement('td');
+                hpCell.textContent = data.hp;
+                row.appendChild(hpCell);
+                var attackCell = document.createElement('td');
+                attackCell.textContent = data.attack;
+                row.appendChild(attackCell);
+                var defenseCell = document.createElement('td');
+                defenseCell.textContent = data.defence;
+                row.appendChild(defenseCell);
+                var speedCell = document.createElement('td');
+                speedCell.textContent = data.speed;
+                row.appendChild(speedCell);
+                var pictureCell = document.createElement('td');
+                var pictureImg = document.createElement('img');
+                pictureImg.src = data.picture;
+                pictureCell.appendChild(pictureImg);
+                row.appendChild(pictureCell);
+
+                tableBody.appendChild(row);
+            }
+        }
+
         function setCookie(name, value, days) {
             var expires = "";
             if (days) {
@@ -12,12 +312,14 @@
             }
             document.cookie = name + "=" + (value || "") + expires + "; path=/";
         }
-        function kostil(){
+
+        function kostil() {
             var offset = document.getElementById("offsetInput").value;
             var limit = document.getElementById("limitInput").value;
             setCookie("offset", offset, 30);
             setCookie("limit", limit, 30);
         }
+
         function getCookie(name) {
             var nameEQ = name + "=";
             var ca = document.cookie.split(';');
@@ -38,14 +340,15 @@
             tr = table.getElementsByTagName("tr");
 
             for (i = 0; i < tr.length; i++) {
-                td = tr[i].getElementsByTagName("td")[0]; // Assuming the name column is the first column (index 0)
+                td = tr[i].getElementsByTagName("td")[0];
                 if (td) {
                     txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
-                    } else {
+                    if (txtValue.toUpperCase().indexOf(filter) === -1) {
                         tr[i].style.display = "none";
                     }
+                    // else {
+                    //     tr[i].style.display = "";
+                    // }
                 }
             }
 
@@ -68,12 +371,41 @@
             if (limit) {
                 document.getElementById("limitInput").value = limit;
             }
-            if(search){
+            if (search) {
                 document.getElementById("searchInput").value = search;
             }
         }
     </script>
     <style>
+        .pagination {
+            display: flex;
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .pagination li {
+            margin-right: 5px;
+        }
+
+        .pagination a {
+            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            color: #333;
+            background-color: #f9f9f9;
+            font-size: 14px;
+        }
+
+        .pagination a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .pagination .active a {
+            background-color: #4CAF50;
+            color: white;
+        }
+
         table {
             border-collapse: collapse;
             width: 100%;
@@ -91,44 +423,29 @@
     </style>
 </head>
 <body onload="loadStoredValues()">
-    <h1>Pokemon Selection</h1>
+<h1>Pokemon Selection</h1>
 
-    <form onsubmit="searchTable(event)">
-        <input type="text" id="searchInput" placeholder="Enter Pokémon name">
-        <button type="submit">Search</button>
-        <button type="button" onclick="denySearch()">Deny</button>
-    </form>
+<form onsubmit="Api_search(event)" method="get">
+    <input type="text" id="searchInput" placeholder="Enter Pokemon name">
+    <button type="submit">Search</button>
+    <button type="button" onclick="denySearch()">Deny</button>
+</form>
 
-    <form action="/pokemon" method="get", onsubmit="kostil()">
-        <label for="offsetInput">Offset:</label>
-        <input type="number" name="offset" id="offsetInput" placeholder="Enter Pokemon offset">
-        <label for="limitInput">Limit:</label>
-        <input type="number" name="limit" id="limitInput" placeholder="Enter Pokemon limit">
-        <button type="submit">Search</button>
-    </form>
+<ul class="pagination" id="paginationContainer">
+</ul>
+<table id="tableBody">
 
-    <table id="tableBody">
-        <tr>
-            <th>Name</th>
-            <th>URL</th>
-        </tr>
-        {% for pokemon in alter_pokemons %}
-        <tr>
-            <td>{{ pokemon.name }}</td>
-            <td>{{ pokemon.url }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+</table>
 
-    <script>
-        function denySearch() {
-            document.getElementById("searchInput").value = "";
-            var table = document.getElementById("tableBody");
-            var rows = table.getElementsByTagName("tr");
-            for (var i = 0; i < rows.length; i++) {
-                rows[i].style.display = "";
-            }
+<script>
+    function denySearch() {
+        document.getElementById("searchInput").value = "";
+        var table = document.getElementById("tableBody");
+        var rows = table.getElementsByTagName("tr");
+        for (var i = 0; i < rows.length; i++) {
+            rows[i].style.display = "";
         }
-    </script>
+    }
+</script>
 </body>
 </html>

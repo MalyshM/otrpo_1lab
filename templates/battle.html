@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Battle</title>
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .table-container {
+            flex: 1;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<button onclick="GoToPagination()">Click to return to pokemon pagination</button>
+<div class="container">
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Height</th>
+                <th>HP</th>
+                <th>Attack</th>
+                <th>Defense</th>
+                <th>Speed</th>
+                <th>Picture</th>
+            </tr>
+            </thead>
+            <tbody id="userPokemonContainer">
+            <!-- Table rows with user Pokémon data will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="button-container">
+        <button id="rollButton">Roll</button>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Height</th>
+                <th>HP</th>
+                <th>Attack</th>
+                <th>Defense</th>
+                <th>Speed</th>
+                <th>Picture</th>
+            </tr>
+            </thead>
+            <tbody id="randomPokemonContainer">
+            <!-- Table rows with random Pokémon data will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        // Get the userPokemon and randomPokemon values from the backend
+        var userPokemon = {{userPokemon|safe}};
+        var randomPokemon = {{randomPokemon|safe}};
+
+        // Example data for the user and random Pokémon
+        var userData = [
+            {
+                name: userPokemon.name,
+                height: userPokemon.height,
+                hp: userPokemon.hp,
+                attack: userPokemon.attack,
+                defence: userPokemon.defence,
+                speed: userPokemon.speed,
+                picture: userPokemon.picture
+            }
+        ];
+
+        var randomData = [
+            {
+                name: randomPokemon.name,
+                height: randomPokemon.height,
+                hp: randomPokemon.hp,
+                attack: randomPokemon.attack,
+                defence: randomPokemon.defence,
+                speed: randomPokemon.speed,
+                picture: randomPokemon.picture
+            }
+        ];
+        console.log(userData)
+        console.log(randomData)
+        // Call the createTable function with the user and random Pokémon data
+        createTable(userData, 'userPokemonContainer');
+        createTable(randomData, 'randomPokemonContainer');
+
+        function createTable(data, containerId) {
+            // Get the table element by its ID
+            var table = document.getElementById(containerId);
+            while (table.firstChild) {
+                table.firstChild.remove();
+            }
+
+            // Create and fill the table rows with data
+            for (var i = 0; i < data.length; i++) {
+                var rowData = data[i];
+                var row = table.insertRow();
+                var keys = Object.keys(rowData);
+                for (var j = 0; j < keys.length; j++) {
+                    var cell = row.insertCell();
+                    var key = keys[j];
+                    if (key === 'picture') {
+                        // Create an image element for the 'picture' key
+                        var img = document.createElement('img');
+                        img.src = rowData[key];
+                        cell.appendChild(img);
+                    } else if (key === 'name') {
+                        // Create an anchor element for the 'name' key
+                        var link = document.createElement('a');
+                        link.textContent = rowData[key];
+                        link.href = '#'; // Add the appropriate href value
+                        cell.appendChild(link);
+                    } else {
+                        cell.textContent = rowData[key];
+                    }
+                }
+            }
+        }
+
+        // Add an event listener to the rollButton
+        var rollButton = document.getElementById("rollButton");
+        rollButton.addEventListener("click", function () {
+            // Roll the dice
+            var userData = getTableData('userPokemonContainer');
+            var randomData = getTableData('randomPokemonContainer');
+            console.log(userData)
+            console.log(randomData)
+            var userRoll = Math.floor(Math.random() * 100) + 1;
+            var computerRoll = Math.floor(Math.random() * 100) + 1;
+            console.log(userRoll)
+            console.log(computerRoll)
+            console.log(userRoll + computerRoll)
+            var who_win = ''
+            var UserHP=0
+            var ComputerHP=0
+            // Update the HP based on the dice rolls
+            if (userRoll + computerRoll % 2 !== 0) {//нечетное
+                userData[0].hp -= 10;
+                UserHP=userData[0].hp
+                ComputerHP=randomData[0].hp
+                console.log(userData[0].hp)
+                who_win = 'computer';
+            }
+            else {
+                randomData[0].hp -= 10;
+                ComputerHP=randomData[0].hp
+                UserHP=userData[0].hp
+                console.log(randomData[0].hp)
+                who_win = 'user';
+            }
+            console.log(who_win)
+            // Update the table rows with the new HP values
+            updateTable('userPokemonContainer', UserHP);
+            updateTable('randomPokemonContainer', ComputerHP);
+            if (UserHP===0){
+                alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer");
+                GoToPagination()
+
+            }
+            else if (ComputerHP===0){
+                alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user");
+                GoToPagination()
+            }
+            else{
+                alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win);
+            }
+            // Example: Display a message with the dice roll
+        });
+
+        function getTableData(containerId) {
+            var table = document.getElementById(containerId);
+            // console.log(table)
+            var data = [];
+            var header = ['name', 'height', 'hp','attack','defence','speed','picture'];
+
+            // console.log(table.rows)
+            // Iterate through each row of the table
+            for (var i = 0; i < table.rows.length; i++) {
+                var row = table.rows[i];
+                // console.log(row)
+                var rowData = {};
+
+                // Iterate through each cell of the row
+                for (var j = 0; j < row.cells.length; j++) {
+                    var cell = row.cells[j];
+                    // console.log(cell)
+                    // var header = table.rows[0].cells[j].textContent;
+                    rowData[header[j]] = cell.textContent;
+                    // Store the cell data in the corresponding property of the rowData object
+
+                }
+
+                // Add the rowData object to the data array
+                data.push(rowData);
+            }
+
+            return data;
+        }
+
+        function updateTable(containerId, hp) {
+    var table = document.getElementById(containerId);
+    var data = [];
+    var header = ['name', 'height', 'hp', 'attack', 'defence', 'speed', 'picture'];
+
+    // Iterate through each row of the table
+    for (var i = 0; i < table.rows.length; i++) {
+        var row = table.rows[i];
+        var rowData = {};
+
+        // Iterate through each cell of the row
+        for (var j = 0; j < row.cells.length; j++) {
+            var cell = row.cells[j];
+
+            // Update only the "hp" cell
+            if (header[j] === 'hp') {
+                var newHpValue = hp;/* Your new HP value here */ // Replace with the desired new HP value
+                cell.textContent = newHpValue;
+                rowData[header[j]] = newHpValue;
+            } else {
+                rowData[header[j]] = cell.textContent;
+            }
+        }
+
+        // Add the rowData object to the data array
+        data.push(rowData);
+    }
+
+    return data;
+}
+    })
+
+    function GoToPagination() {
+        window.location.href = '/'; // Replace 'https://example.com/pokemon-pagination' with your desired URL
+    }
+</script>
+</body>
+</html>
