@@ -190,21 +190,70 @@
             // Update the table rows with the new HP values
             updateTable('userPokemonContainer', UserHP);
             updateTable('randomPokemonContainer', ComputerHP);
+            var user_pokemon = userData[0].name
+            var computer_pokemon = randomData[0].name
+
             if (UserHP===0){
                 alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer");
+                var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer"
+                console.log(data)
+                console.log(user_pokemon)
+                console.log(computer_pokemon)
+                call_saving_pokemon(user_pokemon,computer_pokemon,data)
                 GoToPagination()
 
             }
             else if (ComputerHP===0){
                 alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user");
+                var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user"
+                console.log(data)
+                console.log(user_pokemon)
+                console.log(computer_pokemon)
+                call_saving_pokemon(user_pokemon,computer_pokemon,data)
                 GoToPagination()
             }
             else{
+
                 alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win);
+                var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win
+                console.log(data)
+                console.log(user_pokemon)
+                console.log(computer_pokemon)
+                call_saving_pokemon(user_pokemon,computer_pokemon,data)
             }
             // Example: Display a message with the dice roll
         });
+        async function call_saving_pokemon(user_pokemon, computer_pokemon, data) {
+  try {
+    const user = {
+      user_pokemon: user_pokemon,
+      computer_pokemon: computer_pokemon,
+      data: data
+    };
 
+    console.log('start saving');
+    console.log(data);
+    console.log(user_pokemon);
+    console.log(computer_pokemon);
+    console.log('user');
+    console.log(user);
+    const response = await fetch('/api/save_battle_round', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(user)
+    });
+
+    if (!response.ok) {
+      throw new Error('API request failed');
+    }
+
+    console.log('Data saved successfully!');
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+}
         function getTableData(containerId) {
             var table = document.getElementById(containerId);
             // console.log(table)
