@@ -158,107 +158,144 @@
         // Add an event listener to the rollButton
         var rollButton = document.getElementById("rollButton");
         rollButton.addEventListener("click", function () {
-            // Roll the dice
-            var userData = getTableData('userPokemonContainer');
-            var randomData = getTableData('randomPokemonContainer');
-            console.log(userData)
-            console.log(randomData)
-            var userRoll = Math.floor(Math.random() * 100) + 1;
-            var computerRoll = Math.floor(Math.random() * 100) + 1;
-            console.log(userRoll)
-            console.log(computerRoll)
-            console.log(userRoll + computerRoll)
-            var who_win = ''
-            var UserHP=0
-            var ComputerHP=0
-            // Update the HP based on the dice rolls
-            if (userRoll + computerRoll % 2 !== 0) {//нечетное
-                userData[0].hp -= 10;
-                UserHP=userData[0].hp
-                ComputerHP=randomData[0].hp
-                console.log(userData[0].hp)
-                who_win = 'computer';
-            }
-            else {
-                randomData[0].hp -= 10;
-                ComputerHP=randomData[0].hp
-                UserHP=userData[0].hp
-                console.log(randomData[0].hp)
-                who_win = 'user';
-            }
-            console.log(who_win)
-            // Update the table rows with the new HP values
-            updateTable('userPokemonContainer', UserHP);
-            updateTable('randomPokemonContainer', ComputerHP);
-            var user_pokemon = userData[0].name
-            var computer_pokemon = randomData[0].name
+            // Create the input field
+            var screenWidth = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    var screenHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+    var windowWidth = 300;
+    var windowHeight = 200;
+    var windowLeft = (screenWidth - windowWidth) / 2;
+    var windowTop = (screenHeight - windowHeight) / 2;
 
-            if (UserHP===0){
-                alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer");
-                var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer"
-                console.log(data)
-                console.log(user_pokemon)
-                console.log(computer_pokemon)
-                call_saving_pokemon(user_pokemon,computer_pokemon,data)
-                GoToPagination()
+    // Create a new window
+    var userInputWindow = window.open("", "_blank", "width=300,height=200,left=" + windowLeft + ",top=" + windowTop);
+            var inputField = document.createElement("input");
+            inputField.type = "number";
+            inputField.min = 1;
+            inputField.max = 100;
+            inputField.id = "userInput";
 
-            }
-            else if (ComputerHP===0){
-                alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user");
-                var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user"
-                console.log(data)
-                console.log(user_pokemon)
-                console.log(computer_pokemon)
-                call_saving_pokemon(user_pokemon,computer_pokemon,data)
-                GoToPagination()
-            }
-            else{
+            // Create the button to submit the input
+            var submitButton = document.createElement("button");
+            submitButton.textContent = "Submit";
 
-                alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win);
-                var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win
-                console.log(data)
-                console.log(user_pokemon)
-                console.log(computer_pokemon)
-                call_saving_pokemon(user_pokemon,computer_pokemon,data)
-            }
-            // Example: Display a message with the dice roll
+            // Append the input field and submit button to the document body
+            userInputWindow.document.body.appendChild(inputField);
+            userInputWindow.document.body.appendChild(submitButton);
+
+            // Event listener for the submit button
+            submitButton.addEventListener("click", function () {
+                var userInput = parseInt(inputField.value);
+
+                // Check if the user's input is a valid number from 1 to 100
+                if (isNaN(userInput) || userInput < 1 || userInput > 100) {
+                    alert("Please enter a valid number from 1 to 100.");
+                    return;
+                }
+
+                // Roll the dice
+                var userData = getTableData('userPokemonContainer');
+                var randomData = getTableData('randomPokemonContainer');
+                console.log(userData)
+                console.log(randomData)
+                var userRoll = userInput;
+                var computerRoll = Math.floor(Math.random() * 100) + 1;
+                console.log(userRoll)
+                console.log(computerRoll)
+                console.log(userRoll + computerRoll)
+                var who_win = ''
+                var UserHP = 0
+                var ComputerHP = 0
+                // Update the HP based on the dice rolls
+                if (userRoll + computerRoll % 2 !== 0) {//нечетное
+                    userData[0].hp -= randomData[0].attack;
+                    UserHP = userData[0].hp
+                    ComputerHP = randomData[0].hp
+                    console.log(userData[0].hp)
+                    who_win = 'computer';
+                } else {
+                    randomData[0].hp -= userData[0].attack;
+                    ComputerHP = randomData[0].hp
+                    UserHP = userData[0].hp
+                    console.log(randomData[0].hp)
+                    who_win = 'user';
+                }
+                console.log(who_win)
+                // Update the table rows with the new HP values
+                updateTable('userPokemonContainer', UserHP);
+                updateTable('randomPokemonContainer', ComputerHP);
+                var user_pokemon = userData[0].name
+                var computer_pokemon = randomData[0].name
+
+                if (UserHP <= 0) {
+                    alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer");
+                    var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of battle is computer"
+                    console.log(data)
+                    console.log(user_pokemon)
+                    console.log(computer_pokemon)
+                    call_saving_pokemon(user_pokemon, computer_pokemon, data)
+                    GoToPagination()
+
+                } else if (ComputerHP <= 0) {
+                    alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user");
+                    var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user"
+                    console.log(data)
+                    console.log(user_pokemon)
+                    console.log(computer_pokemon)
+                    call_saving_pokemon(user_pokemon, computer_pokemon, data)
+                    GoToPagination()
+                } else {
+
+                    alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win);
+                    // var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win
+                    console.log(data)
+                    console.log(user_pokemon)
+                    console.log(computer_pokemon)
+                    // call_saving_pokemon(user_pokemon,computer_pokemon,data)
+                }
+                userInputWindow.close();
+
+                // Example: Display a message with the dice roll
+            });
         });
+
+
         async function call_saving_pokemon(user_pokemon, computer_pokemon, data) {
-  try {
-    const user = {
-      user_pokemon: user_pokemon,
-      computer_pokemon: computer_pokemon,
-      data: data
-    };
+            try {
+                const user = {
+                    user_pokemon: user_pokemon,
+                    computer_pokemon: computer_pokemon,
+                    data: data
+                };
 
-    console.log('start saving');
-    console.log(data);
-    console.log(user_pokemon);
-    console.log(computer_pokemon);
-    console.log('user');
-    console.log(user);
-    const response = await fetch('/api/save_battle_round', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(user)
-    });
+                console.log('start saving');
+                console.log(data);
+                console.log(user_pokemon);
+                console.log(computer_pokemon);
+                console.log('user');
+                console.log(user);
+                const response = await fetch('/api/save_battle_round', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(user)
+                });
 
-    if (!response.ok) {
-      throw new Error('API request failed');
-    }
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
 
-    console.log('Data saved successfully!');
-  } catch (error) {
-    console.error('Error:', error.message);
-  }
-}
+                console.log('Data saved successfully!');
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
+        }
+
         function getTableData(containerId) {
             var table = document.getElementById(containerId);
             // console.log(table)
             var data = [];
-            var header = ['name', 'height', 'hp','attack','defence','speed','picture'];
+            var header = ['name', 'height', 'hp', 'attack', 'defence', 'speed', 'picture'];
 
             // console.log(table.rows)
             // Iterate through each row of the table
@@ -285,35 +322,35 @@
         }
 
         function updateTable(containerId, hp) {
-    var table = document.getElementById(containerId);
-    var data = [];
-    var header = ['name', 'height', 'hp', 'attack', 'defence', 'speed', 'picture'];
+            var table = document.getElementById(containerId);
+            var data = [];
+            var header = ['name', 'height', 'hp', 'attack', 'defence', 'speed', 'picture'];
 
-    // Iterate through each row of the table
-    for (var i = 0; i < table.rows.length; i++) {
-        var row = table.rows[i];
-        var rowData = {};
+            // Iterate through each row of the table
+            for (var i = 0; i < table.rows.length; i++) {
+                var row = table.rows[i];
+                var rowData = {};
 
-        // Iterate through each cell of the row
-        for (var j = 0; j < row.cells.length; j++) {
-            var cell = row.cells[j];
+                // Iterate through each cell of the row
+                for (var j = 0; j < row.cells.length; j++) {
+                    var cell = row.cells[j];
 
-            // Update only the "hp" cell
-            if (header[j] === 'hp') {
-                var newHpValue = hp;/* Your new HP value here */ // Replace with the desired new HP value
-                cell.textContent = newHpValue;
-                rowData[header[j]] = newHpValue;
-            } else {
-                rowData[header[j]] = cell.textContent;
+                    // Update only the "hp" cell
+                    if (header[j] === 'hp') {
+                        var newHpValue = hp;/* Your new HP value here */ // Replace with the desired new HP value
+                        cell.textContent = newHpValue;
+                        rowData[header[j]] = newHpValue;
+                    } else {
+                        rowData[header[j]] = cell.textContent;
+                    }
+                }
+
+                // Add the rowData object to the data array
+                data.push(rowData);
             }
+
+            return data;
         }
-
-        // Add the rowData object to the data array
-        data.push(rowData);
-    }
-
-    return data;
-}
     })
 
     function GoToPagination() {

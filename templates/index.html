@@ -126,7 +126,7 @@
                 for (var j = 0; j < keys.length; j++) {
                     var cell = row.insertCell();
                     var key = keys[j];
-                    console.log(key)
+                    // console.log(key)
                     if (key === 'picture') {
                         // Create an image element for the 'picture' key
                         var img = document.createElement('img');
@@ -140,18 +140,28 @@
                         cell.appendChild(link);
                     } else if (key === 'choose') {
                         // Create the "Choose" button
-                        console.log(key)
+                        // console.log(key)
                         var chooseBtn = document.createElement('button');
                         chooseBtn.textContent = rowData[key];
-                        chooseBtn.addEventListener('click', function () {
-                            choosePokemon(rowData['name']);
-                        });
+                        chooseBtn.addEventListener('click', (function (pokemonName) {
+                            return function () {
+                                console.log(pokemonName);
+                                choosePokemon(pokemonName);
+                            };
+                        })(rowData['name']));
                         cell.appendChild(chooseBtn);
                     } else {
                         cell.innerHTML = rowData[key];
                     }
                 }
             }
+        }
+
+        function createChooseEventListener(pokemonName) {
+            return function () {
+                console.log(pokemonName);
+                choosePokemon(pokemonName);
+            };
         }
 
         function choosePokemon(userPokemonName) {
