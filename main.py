@@ -8,7 +8,8 @@ from fastapi.templating import Jinja2Templates
 import httpx
 from starlette.middleware.cors import CORSMiddleware
 
-from handlers import router, fetch
+from handlers import router, fetch, Email
+from send_mail import send_email
 
 
 def get_application() -> FastAPI:
@@ -86,6 +87,14 @@ async def battle(request: Request, userPokemon: str, randomPokemon: str):
     return templates.TemplateResponse("battle.html",
                                       {"request": request, "userPokemon": response_list[0],
                                        "randomPokemon": response_list[1]})
+
+
+@app.post("/send-email")
+def send_email_route(email:Email):
+    print(email.to_email)
+    print(email.subject)
+    print(email.message)
+    return send_email(email.to_email, email.subject, email.message)
 
 
 if __name__ == "__main__":

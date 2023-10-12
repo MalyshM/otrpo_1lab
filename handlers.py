@@ -43,6 +43,10 @@ class User(BaseModel):
     computer_pokemon: str
     data: str
 
+class Email(BaseModel):
+    to_email: str
+    subject: str
+    message: str
 
 async def fetch(session, url):
     async with session.get(url, ssl=False) as response:

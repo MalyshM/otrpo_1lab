@@ -63,7 +63,9 @@
     <div class="button-container">
         <button id="rollButton">Roll</button>
     </div>
-
+    <div class="button-container">
+        <button id="fastFight">Fast fight</button>
+    </div>
     <div class="table-container">
         <table>
             <thead>
@@ -257,8 +259,125 @@
                 // Example: Display a message with the dice roll
             });
         });
+        document.getElementById('fastFight').addEventListener('click', function() {
+    var userData = getTableData('userPokemonContainer');
+    var randomData = getTableData('randomPokemonContainer');
+    console.log(userData);
+    console.log(randomData);
 
+    for (var i = 0; i < 99999; i++) {
+        var userRoll = Math.floor(Math.random() * 100) + 1;
+        var computerRoll = Math.floor(Math.random() * 100) + 1;
+        console.log(userRoll);
+        console.log(computerRoll);
+        console.log(userRoll + computerRoll);
+        var who_win = '';
+        var UserHP = 0;
+        var ComputerHP = 0;
 
+        // Update the HP based on the dice rolls
+        if ((userRoll + computerRoll) % 2 !== 0) { // If sum is odd
+            userData[0].hp -= randomData[0].attack;
+            UserHP = userData[0].hp;
+            ComputerHP = randomData[0].hp;
+            console.log(userData[0].hp);
+            who_win = 'computer';
+        } else {
+            randomData[0].hp -= userData[0].attack;
+            ComputerHP = randomData[0].hp;
+            UserHP = userData[0].hp;
+            console.log(randomData[0].hp);
+            who_win = 'user';
+        }
+
+        console.log(who_win);
+
+        // Update the table rows with the new HP values
+        updateTable('userPokemonContainer', UserHP);
+        updateTable('randomPokemonContainer', ComputerHP);
+        var user_pokemon = userData[0].name;
+        var computer_pokemon = randomData[0].name;
+
+        if (UserHP <= 0) {
+            alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of the battle is computer");
+            var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of the battle is computer";
+            console.log(data);
+            console.log(user_pokemon);
+            console.log(computer_pokemon);
+            call_saving_pokemon(user_pokemon, computer_pokemon, data);
+            var subject = "The results of the battle with your pokemon";
+            var message = data;
+            createEmailWindow(subject,message);
+
+            break;
+        } else if (ComputerHP <= 0) {
+            alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of the battle is computer");
+            var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of the battle is computer";
+            console.log(data);
+            console.log(user_pokemon);
+            console.log(computer_pokemon);
+            call_saving_pokemon(user_pokemon, computer_pokemon, data);
+            var subject = "The results of the battle with your pokemon";
+            var message = data;
+            createEmailWindow(subject,message);
+
+            break;
+        } else {
+            // alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of the round is " + who_win);
+            // var data = "User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of the round is " + who_win;
+            console.log(data);
+            console.log(user_pokemon);
+            console.log(computer_pokemon);
+            // call_saving_pokemon(user_pokemon,computer_pokemon,data);
+        }
+    }
+});
+
+        function createEmailWindow(subject, message) {
+  var emailWindow = window.open('', '_blank', 'width=400,height=200');
+  emailWindow.document.write('<h2>Enter Email</h2>');
+  emailWindow.document.write('<form id="emailForm">');
+  emailWindow.document.write('  <input type="text" id="emailInput" placeholder="Enter email address" required>');
+  emailWindow.document.write('  <br>');
+  emailWindow.document.write('  <button type="submit">Send Email</button>');
+  emailWindow.document.write('</form>');
+
+  emailWindow.document.getElementById('emailForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    var email = emailWindow.document.getElementById('emailInput').value;
+    emailWindow.close();
+    console.log(email);
+    console.log(subject);
+    console.log(message);
+    sendEmail(email, subject, message);
+    GoToPagination();
+  });
+}
+        function sendEmail(toEmail, subject, message) {
+  var emailData = {
+    to_email: toEmail,
+    subject: subject,
+    message: message
+  };
+
+  fetch('/send-email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(emailData)
+  })
+    .then(function(response) {
+      if (response.ok) {
+        console.log('Email sent successfully.');
+      } else {
+        console.error('Failed to send email.');
+      }
+    })
+    .catch(function(error) {
+      console.error('Error sending email:', error);
+    });
+}
         async function call_saving_pokemon(user_pokemon, computer_pokemon, data) {
             try {
                 const user = {
