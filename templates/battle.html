@@ -234,8 +234,10 @@
                     console.log(data)
                     console.log(user_pokemon)
                     console.log(computer_pokemon)
-                    call_saving_pokemon(user_pokemon, computer_pokemon, data)
-                    GoToPagination()
+                    call_saving_pokemon(user_pokemon, computer_pokemon, data, computer_pokemon);
+                    setTimeout(function () {
+  GoToPagination();
+}, 3000);
 
                 } else if (ComputerHP <= 0) {
                     alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is user");
@@ -243,8 +245,10 @@
                     console.log(data)
                     console.log(user_pokemon)
                     console.log(computer_pokemon)
-                    call_saving_pokemon(user_pokemon, computer_pokemon, data)
-                    GoToPagination()
+                    call_saving_pokemon(user_pokemon, computer_pokemon, data, user_pokemon);
+                    setTimeout(function () {
+  GoToPagination();
+}, 3000);
                 } else {
 
                     alert("User rolled: " + userRoll + "\nComputer rolled: " + computerRoll + "\nThe winner of round is " + who_win);
@@ -304,7 +308,7 @@
             console.log(data);
             console.log(user_pokemon);
             console.log(computer_pokemon);
-            call_saving_pokemon(user_pokemon, computer_pokemon, data);
+            call_saving_pokemon(user_pokemon, computer_pokemon, data, computer_pokemon);
             var subject = "The results of the battle with your pokemon";
             var message = data;
             createEmailWindow(subject,message);
@@ -316,7 +320,7 @@
             console.log(data);
             console.log(user_pokemon);
             console.log(computer_pokemon);
-            call_saving_pokemon(user_pokemon, computer_pokemon, data);
+            call_saving_pokemon(user_pokemon, computer_pokemon, data,user_pokemon);
             var subject = "The results of the battle with your pokemon";
             var message = data;
             createEmailWindow(subject,message);
@@ -378,12 +382,13 @@
       console.error('Error sending email:', error);
     });
 }
-        async function call_saving_pokemon(user_pokemon, computer_pokemon, data) {
+        async function call_saving_pokemon(user_pokemon, computer_pokemon, data,winner) {
             try {
                 const user = {
                     user_pokemon: user_pokemon,
                     computer_pokemon: computer_pokemon,
-                    data: data
+                    data: data,
+                    winner: winner
                 };
 
                 console.log('start saving');

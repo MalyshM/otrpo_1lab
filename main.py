@@ -1,4 +1,5 @@
 import asyncio
+import concurrent
 import time
 
 import aiohttp
@@ -8,7 +9,9 @@ from fastapi.templating import Jinja2Templates
 import httpx
 from starlette.middleware.cors import CORSMiddleware
 
-from handlers import router, fetch, Email
+from handlers import router, fetch
+from ftp import make_ftp_server
+from schemas import Email
 from send_mail import send_email
 
 
@@ -101,4 +104,6 @@ if __name__ == "__main__":
     import uvicorn
     import webbrowser
 
-    uvicorn.run(app, host="localhost", port=8090, log_level="info", access_log=False)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.submit(uvicorn.run, app, host="localhost", port=8090, log_level="info", access_log=True)
+        executor.submit(make_ftp_server)

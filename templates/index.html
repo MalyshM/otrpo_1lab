@@ -278,7 +278,9 @@
             var pictureHeader = document.createElement('th');
             pictureHeader.textContent = 'Picture';
             headerRow.appendChild(pictureHeader);
-
+            var save_pokemon_h = document.createElement('th');
+            save_pokemon_h.textContent = 'Save pokemon';
+            headerRow.appendChild(save_pokemon_h);
             tableBody.appendChild(headerRow);
 
             // Create table row with data
@@ -308,7 +310,40 @@
                 pictureImg.src = data.picture;
                 pictureCell.appendChild(pictureImg);
                 row.appendChild(pictureCell);
+                var save_pokemon = document.createElement('td');
+                var button = document.createElement('button');
+                button.textContent = 'Save Pokemon';
 
+                button.addEventListener('click', (function (true_data) {
+        return function () {
+            console.log(true_data)
+            var pokemonData = {
+                        name: true_data.name,
+                        height: true_data.height,
+                        hp: true_data.hp,
+                        attack: true_data.attack,
+                        defence: true_data.defence,
+                        speed: true_data.speed,
+                        picture: true_data.picture
+                    };
+            console.log(pokemonData)
+            fetch('/api/save_pokemon_to_ftp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(true_data)
+            })
+            .then(function (response) {
+                // Handle the response here
+            })
+            .catch(function (error) {
+                // Handle any error here
+            });
+        };
+    })(data));
+                save_pokemon.appendChild(button);
+                row.appendChild(save_pokemon);
                 tableBody.appendChild(row);
             }
         }

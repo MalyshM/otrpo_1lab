@@ -1,56 +1,17 @@
 import asyncio
 import datetime
 import time
-import psycopg2
 import aiohttp as aiohttp
 from fastapi import APIRouter, Query
-from pydantic import BaseModel
 from sqlalchemy.dialects.postgresql import JSONB
 from starlette import status
 
+from models import connect_db, PokemonBattle
+from ftp import save_pokemon_to_FTP
+from schemas import User, Pokemon
+from util_tools import fetch
+
 router = APIRouter()
-
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, \
-    text, create_engine, Text
-from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-
-
-def connect_db():
-    DATABASE_URL = "postgresql://postgres:admin@localhost/OTRPO_proj"
-    engine = create_engine(DATABASE_URL)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
-
-
-Base = declarative_base()
-metadata = Base.metadata
-
-
-class PokemonBattle(Base):
-    __tablename__ = 'pokemon_battle'
-
-    id = Column(Integer, primary_key=True, server_default=text("nextval('category_all_in_one_id_seq'::regclass)"))
-    data = Column(String(255))
-    date_of_round = Column(DateTime)
-    user_pokemon = Column(String(255))
-    computer_pokemon = Column(String(255))
-
-
-class User(BaseModel):
-    user_pokemon: str
-    computer_pokemon: str
-    data: str
-
-class Email(BaseModel):
-    to_email: str
-    subject: str
-    message: str
-
-async def fetch(session, url):
-    async with session.get(url, ssl=False) as response:
-        return await response.json()
 
 
 @router.get('/api/search', name='Plot:plot', status_code=status.HTTP_200_OK,
@@ -79,8 +40,7 @@ async def search(name_to_find: str = None):
     timeout = aiohttp.ClientTimeout(total=30)
     conn = aiohttp.TCPConnector(limit_per_host=20)
     async with aiohttp.ClientSession(trust_env=True, headers=headers, timeout=timeout, connector=conn) as session:
-        async with session.get(url, ssl=False) as response:
-            response1 = await response.json()
+        response1 = await fetch(session=session, url=url)
         print("--- %s seconds ---" % (time.time() - start_time), end=" get first response\n")
         # print(response1)
         names = response1['results']
@@ -101,7 +61,8 @@ async def search(name_to_find: str = None):
                               'attack': response['stats'][1]['base_stat'],
                               'defence': response['stats'][2]['base_stat'],
                               'speed': response['stats'][5]['base_stat'],
-                              'picture': response['sprites']['front_default']})
+                              'picture': response['sprites']['front_default'],
+                              'save_pokemon':"Save pokemon to FTP"})
     print("--- %s seconds ---" % (time.time() - start_time), end=" finish\n")
     return response_list
     # print(names)
@@ -123,7 +84,7 @@ async def search(name_to_find: str = None):
                     Returns:
                         List[Seller]: список продавцов.
             """)
-async def search(offset: int = None, limit: int = None):
+async def pagination(offset: int = None, limit: int = None):
     # Create your plot using Plotly
     response_list = []
     start_time = time.time()
@@ -134,8 +95,7 @@ async def search(offset: int = None, limit: int = None):
     timeout = aiohttp.ClientTimeout(total=30)
     conn = aiohttp.TCPConnector(limit_per_host=20)
     async with aiohttp.ClientSession(trust_env=True, headers=headers, timeout=timeout, connector=conn) as session:
-        async with session.get(url, ssl=False) as response:
-            response1 = await response.json()
+        response1 = await fetch(session=session, url=url)
         print("--- %s seconds ---" % (time.time() - start_time), end=" get first response\n")
         # print(response1)
         names = response1['results']
@@ -163,14 +123,21 @@ async def search(offset: int = None, limit: int = None):
 
 
 @router.post('/api/save_battle_round', name='Plot:plot', status_code=status.HTTP_200_OK, tags=["Plot"])
-def save_battle_round(user: User):
+async def save_battle_round(user: User):
     # Create your plot using Plotly
     db = connect_db()
     print(user.data)
     print(user.user_pokemon)
     print(user.computer_pokemon)
-    db.add(PokemonBattle(data=user.data, user_pokemon=user.user_pokemon, computer_pokemon=user.computer_pokemon, date_of_round=datetime.datetime.now()))
+    db.add(PokemonBattle(data=user.data, user_pokemon=user.user_pokemon, computer_pokemon=user.computer_pokemon,
+                         date_of_round=datetime.datetime.now().date(), winner=user.winner))
     db.commit()
     db.close()
     return 'success'
 # print(names)
+
+@router.post('/api/save_pokemon_to_ftp', name='Plot:plot', status_code=status.HTTP_200_OK, tags=["Plot"])
+async def save_pokemon_to_ftp(pokemon: Pokemon):
+    res= await save_pokemon_to_FTP(pokemon)
+    print(res)
+    return res
