@@ -10,7 +10,7 @@ import httpx
 from starlette.middleware.cors import CORSMiddleware
 
 from handlers import router, fetch
-from ftp import make_ftp_server
+# from ftp import make_ftp_server
 from schemas import Email
 from send_mail import send_email
 
@@ -100,10 +100,10 @@ def send_email_route(email:Email):
     return send_email(email.to_email, email.subject, email.message)
 
 
-if __name__ == "__main__":
-    import uvicorn
-    import webbrowser
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        executor.submit(uvicorn.run, app, host="localhost", port=8090, log_level="info", access_log=True)
-        executor.submit(make_ftp_server)
+# if __name__ == "__main__":
+#     import uvicorn
+#     import webbrowser
+#
+#     with concurrent.futures.ThreadPoolExecutor() as executor:
+#         executor.submit(uvicorn.run, app, host="localhost", port=8090, log_level="info", access_log=True)
+    #     executor.submit(make_ftp_server)

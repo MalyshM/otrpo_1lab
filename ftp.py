@@ -10,32 +10,11 @@ import threading
 from schemas import Pokemon
 
 
-def make_ftp_server():
-    FTP_PORT = 2121
-    FTP_USER = "myuser"
-    FTP_PASSWORD = "change_this_password"
-    FTP_DIRECTORY = "C:\\Users\\bossi\\PycharmProjects\\fastApiProject2\\otrpo_1lab\\FTP"
-    authorizer = DummyAuthorizer()
-    authorizer.add_user(FTP_USER, FTP_PASSWORD, FTP_DIRECTORY, perm='elradfmw')
-
-    handler = FTPHandler
-    handler.authorizer = authorizer
-    handler.banner = "pyftpdlib based ftpd ready."
-
-    address = ('', FTP_PORT)
-    server = FTPServer(address, handler)
-
-    server.max_cons = 256
-    server.max_cons_per_ip = 5
-
-    server.serve_forever()
-
-
 async def save_pokemon_to_FTP(pokemon):
-    ftp_address = 'localhost'
+    ftp_address = 'ftp'
     ftp_username = 'myuser'
     ftp_password = 'change_this_password'
-    ftp_base_directory = ''
+    ftp_base_directory = ''  # Updated base directory
 
     ftp = FTP()
     ftp.connect(ftp_address, 2121)
@@ -65,7 +44,6 @@ async def save_pokemon_to_FTP(pokemon):
             speed=dict_['speed'],
             picture=dict_['picture'],
         )
-
         today = date.today()
         folder_name = today.strftime('%Y%m%d')
         ftp_folder_path = os.path.join(ftp_base_directory, folder_name)
@@ -76,18 +54,22 @@ async def save_pokemon_to_FTP(pokemon):
         ftp.cwd(ftp_folder_path)
 
         file_name = f'{dict_["name"]}.md'
-        with open(file_name, 'w') as f:
+        file_path = os.path.join(file_name)  # Specify the full file path
+        print(file_path)
+        with open(file_path, 'w') as f:
             f.write(markdown_content)
-        # with open(file_name, 'rb') as f:
-        #     ftp.storbinary(f'STOR {file_name}', f)
+            print(markdown_content)
 
-        ftp.quit()
+        with open(file_path, 'rb') as f:
+            ftp.storbinary(f'STOR {file_name}', f)
+            print(f'STOR {file_name}')
+
+        # ftp.quit()
         return {'message': 'Pokémon information saved successfully'}
-
 
 # if __name__ == '__main__':
 #     thread = threading.Thread(target=save_pokemon_to_FTP, args=(
 #     Pokemon(name="asd", height=12, hp=32, attack=34, defence=54, speed=56, picture="asd"),))
 #     thread.start()
 #
-#     make_ftp_server()
+# make_ftp_server()

@@ -3,7 +3,7 @@ from sqlalchemy import BigInteger, Boolean, Column, DateTime, Float, ForeignKey,
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 def connect_db():
-    DATABASE_URL = "postgresql://postgres:admin@localhost/OTRPO_proj"
+    DATABASE_URL = "postgresql://postgres:admin@db/otrpo_proj"
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     session = Session()

@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mydatabase
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  app:
+    build: .
+    container_name: uuzzuumm_true_shower
+    ports:
+      - '8090:80'
+    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 80"
+    env_file:
+      - .env
+    volumes:
+      - /app/FTP:/app/FTP
+    environment:
+      - PYTHONPATH=/app/app
+    depends_on:
+      - db
+      - ftp
+
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+
+
+  ftp:
+    build: .
+    container_name: ftp
+    environment:
+      - PYTHONPATH=/app/app
+    command: bash -c "cd app; python ftp_start.py;"
+    volumes:
+      - /app/FTP:/app/FTP
+    depends_on:
+      - db
+    ports:
+      - '2121:2121'
+
+
+volumes:
+  app_data:
+
+

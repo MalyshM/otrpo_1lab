@@ -1,16 +1,18 @@
+import ast
 import asyncio
 import datetime
+import json
 import time
 import aiohttp as aiohttp
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from sqlalchemy.dialects.postgresql import JSONB
 from starlette import status
-
+import redis
 from models import connect_db, PokemonBattle
 from ftp import save_pokemon_to_FTP
 from schemas import User, Pokemon
 from util_tools import fetch
-
+from redis import connect_to_redis_true
 router = APIRouter()
 
 
@@ -62,7 +64,7 @@ async def search(name_to_find: str = None):
                               'defence': response['stats'][2]['base_stat'],
                               'speed': response['stats'][5]['base_stat'],
                               'picture': response['sprites']['front_default'],
-                              'save_pokemon':"Save pokemon to FTP"})
+                              'save_pokemon': "Save pokemon to FTP"})
     print("--- %s seconds ---" % (time.time() - start_time), end=" finish\n")
     return response_list
     # print(names)
@@ -87,9 +89,20 @@ async def search(name_to_find: str = None):
 async def pagination(offset: int = None, limit: int = None):
     # Create your plot using Plotly
     response_list = []
+
     start_time = time.time()
     url = f'https://pokeapi.co/api/v2/pokemon?limit={limit}&offset={offset}'
-
+    redis = await connect_to_redis_true()
+    # await redis.flushdb()
+    try:
+        cached_response = await redis.get(str((offset // 20) + 1))
+        res = ast.literal_eval(cached_response)
+        if res is not None:
+            print("--- %s seconds ---" % (time.time() - start_time), end=" finish\n")
+            await redis.close()
+            return res
+    except:
+        pass
     headers = {'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
     timeout = aiohttp.ClientTimeout(total=30)
@@ -117,15 +130,17 @@ async def pagination(offset: int = None, limit: int = None):
                               'speed': response['stats'][5]['base_stat'],
                               'picture': response['sprites']['front_default'],
                               'choose': 'Выбрать'})
-
+    await redis.set(str((offset // 20) + 1), str(response_list), ex=3600)
+    # cached_response= await redis.get(str((offset // 20) + 1))
+    # print(cached_response)
     print("--- %s seconds ---" % (time.time() - start_time), end=" finish\n")
+    await redis.close()
     return response_list
 
 
 @router.post('/api/save_battle_round', name='Plot:plot', status_code=status.HTTP_200_OK, tags=["Plot"])
-async def save_battle_round(user: User):
+async def save_battle_round(user: User, db=Depends(connect_db)):
     # Create your plot using Plotly
-    db = connect_db()
     print(user.data)
     print(user.user_pokemon)
     print(user.computer_pokemon)
@@ -134,10 +149,20 @@ async def save_battle_round(user: User):
     db.commit()
     db.close()
     return 'success'
+
+
 # print(names)
 
 @router.post('/api/save_pokemon_to_ftp', name='Plot:plot', status_code=status.HTTP_200_OK, tags=["Plot"])
 async def save_pokemon_to_ftp(pokemon: Pokemon):
-    res= await save_pokemon_to_FTP(pokemon)
+    res = await save_pokemon_to_FTP(pokemon)
     print(res)
     return res
+
+
+@router.get('/api/get_all_battle_saves', name='Plot:plot', status_code=status.HTTP_200_OK, tags=["Plot"])
+async def save_battle_round(db=Depends(connect_db)):
+    # Create your plot using Plotly
+    result = db.query(PokemonBattle).all()
+    db.close()
+    return result
