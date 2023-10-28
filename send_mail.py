@@ -2,8 +2,8 @@ import smtplib
 
 
 def send_email(to_email: str, subject: str, message: str):
-    from_email = "boss.igroteka@mail.ru"  # Replace with your email address
-    password = "9T225JimsA5HQaMp05ZV"  # Replace with your email password
+    from_email = "asdasdasdsadasd"  # Replace with your email address
+    password = "asdasdasdasdas"  # Replace with your email password
 
     try:
         server = smtplib.SMTP("smtp.mail.ru", 587)
