@@ -85,7 +85,7 @@ def test_battle_fast_fight():
     # print(type(driver.page_source))
     # Perform actions in the new window
     email_input = driver.find_element(by=By.ID, value='fastFight')
-    email_input.send_keys('malysh_mikhail_s@mail.ru')
+    email_input.send_keys('email')
 
     send_button = driver.find_element(by=By.TAG_NAME, value="button")
     send_button.click()
