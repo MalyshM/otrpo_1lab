@@ -2,6 +2,7 @@ import smtplib
 
 
 def send_email(to_email: str, subject: str, message: str):
+    # todo remake this email and password so they will be setting from .env file
     from_email = "boss.igroteka@mail.ru"  # Replace with your email address
     password = "9T225JimsA5HQaMp05ZV"  # Replace with your email password
 

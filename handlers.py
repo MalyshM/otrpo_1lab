@@ -161,7 +161,7 @@ async def save_pokemon_to_ftp(pokemon: Pokemon):
 
 
 @router.get('/api/get_all_battle_saves', name='Plot:plot', status_code=status.HTTP_200_OK, tags=["Plot"])
-async def save_battle_round(db=Depends(connect_db)):
+async def get_all_battle_saves(db=Depends(connect_db)):
     # Create your plot using Plotly
     result = db.query(PokemonBattle).all()
     db.close()
