@@ -58,6 +58,7 @@ def test_battle_roll():
     alert = driver.switch_to.alert
     alert.accept()
     time.sleep(3)
+    driver.quit()
 
 def test_battle_fast_fight():
     driver = webdriver.Chrome()
@@ -89,6 +90,8 @@ def test_battle_fast_fight():
 
     send_button = driver.find_element(by=By.TAG_NAME, value="button")
     send_button.click()
+    time.sleep(5)
+    driver.quit()
 
 def test_search_pagination_and_pokemon_detail_save():
     driver = webdriver.Chrome()
@@ -124,8 +127,9 @@ def test_search_pagination_and_pokemon_detail_save():
             element.submit()
             break
     time.sleep(5)
+    driver.quit()
 # test_battle_roll()
-# test_battle_fast_fight()
+test_battle_fast_fight()
 # test_search_pagination_and_pokemon_detail_save()
 
 

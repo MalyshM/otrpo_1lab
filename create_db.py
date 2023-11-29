@@ -26,14 +26,24 @@ def db_create():
     cursor = conn.cursor()
     conn.autocommit = True
     sql1 = '''
-    DROP TABLE IF EXISTS pokemon_battle CASCADE;
-    CREATE TABLE pokemon_battle (
+DROP TABLE IF EXISTS pokemon_battle CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+CREATE TABLE users(
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255),
+    password VARCHAR,
+    email VARCHAR(255),
+    date_of_add TIMESTAMP
+);
+CREATE TABLE pokemon_battle (
     id SERIAL PRIMARY KEY,
     data VARCHAR(255),
     user_pokemon VARCHAR(255),
     computer_pokemon VARCHAR(255),
     winner VARCHAR(255),
-    date_of_round TIMESTAMP
+    date_of_round TIMESTAMP,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
     '''
     cursor.execute(sql1)

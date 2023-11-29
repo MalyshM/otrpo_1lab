@@ -383,12 +383,15 @@
     });
 }
         async function call_saving_pokemon(user_pokemon, computer_pokemon, data,winner) {
+            var user_token = localStorage.getItem('access_token')
             try {
+
                 const user = {
                     user_pokemon: user_pokemon,
                     computer_pokemon: computer_pokemon,
                     data: data,
-                    winner: winner
+                    winner: winner,
+                    token: user_token
                 };
 
                 console.log('start saving');

@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
+
     <title>Pokemon Selection</title>
     <script>
         document.addEventListener("DOMContentLoaded", function (event) {
+            const checkbox = document.getElementById('toggleCheckbox');
+            const checkMark = document.getElementById('checkMark');
+
+            checkbox.addEventListener('change', function () {
+                if (checkbox.checked) {
+                    checkMark.classList.add('checked');
+                } else {
+                    checkMark.classList.remove('checked');
+                }
+            });
+            var user_token = localStorage.getItem('access_token')
+            console.log(user_token);
             var totalElements = 1292; // Total number of elements
             var elementsPerPage = 20; // Number of elements per page
             var totalPages = Math.ceil(totalElements / elementsPerPage); // Total number of pages
@@ -315,33 +328,33 @@
                 button.textContent = 'Save Pokemon';
 
                 button.addEventListener('click', (function (true_data) {
-        return function () {
-            console.log(true_data)
-            var pokemonData = {
-                        name: true_data.name,
-                        height: true_data.height,
-                        hp: true_data.hp,
-                        attack: true_data.attack,
-                        defence: true_data.defence,
-                        speed: true_data.speed,
-                        picture: true_data.picture
+                    return function () {
+                        console.log(true_data)
+                        var pokemonData = {
+                            name: true_data.name,
+                            height: true_data.height,
+                            hp: true_data.hp,
+                            attack: true_data.attack,
+                            defence: true_data.defence,
+                            speed: true_data.speed,
+                            picture: true_data.picture
+                        };
+                        console.log(pokemonData)
+                        fetch('/api/save_pokemon_to_ftp', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(true_data)
+                        })
+                            .then(function (response) {
+                                // Handle the response here
+                            })
+                            .catch(function (error) {
+                                // Handle any error here
+                            });
                     };
-            console.log(pokemonData)
-            fetch('/api/save_pokemon_to_ftp', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(true_data)
-            })
-            .then(function (response) {
-                // Handle the response here
-            })
-            .catch(function (error) {
-                // Handle any error here
-            });
-        };
-    })(data));
+                })(data));
                 save_pokemon.appendChild(button);
                 row.appendChild(save_pokemon);
                 tableBody.appendChild(row);
@@ -420,6 +433,34 @@
                 document.getElementById("searchInput").value = search;
             }
         }
+
+        function Register() {
+            const checkbox = document.getElementById('toggleCheckbox');
+            var user_token = localStorage.getItem('access_token');
+            if (checkbox.checked && user_token){
+                window.location.href = '/registration';
+            }
+            else if(user_token){
+                alert("You already registered")
+            }
+            else{
+                window.location.href = '/registration';
+            }
+        }
+
+        function Login() {
+            const checkbox = document.getElementById('toggleCheckbox');
+            var user_token = localStorage.getItem('access_token');
+            if (checkbox.checked && user_token){
+                window.location.href = '/login';
+            }
+            else if(user_token){
+                alert("You already logged in")
+            }
+            else{
+                window.location.href = '/login';
+            }
+        }
     </script>
     <style>
         .pagination {
@@ -474,6 +515,11 @@
     <input type="text" id="searchInput" placeholder="Enter Pokemon name">
     <button type="submit">Search</button>
     <button type="button" onclick="denySearch()">Deny</button>
+    <button type="button" onclick="Register()">Register</button>
+    <button type="button" onclick="Login()">Login</button>
+    <label for="toggleCheckbox">Login into another account/Register new account:</label>
+    <input type="checkbox" id="toggleCheckbox">
+    <span id="checkMark" class="checked">&#10003;</span>
 </form>
 
 <ul class="pagination" id="paginationContainer">

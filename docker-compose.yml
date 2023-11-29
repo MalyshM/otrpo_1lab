@@ -18,6 +18,7 @@ services:
     container_name: uuzzuumm_true_shower
     ports:
       - '8090:80'
+#      python create_db.py;
     command: bash -c "uvicorn main:app --host 0.0.0.0 --port 80"
     env_file:
       - .env
@@ -52,7 +53,7 @@ services:
   unit_tests:
     build: .
     container_name: unit_tests
-    command: bash -c "cd app; python unit_tests_handlers.py;"
+#    command: bash -c "cd app; python unit_tests_handlers.py;"
     volumes:
       - /app/FTP:/app/FTP
     environment:
@@ -65,7 +66,7 @@ services:
   selenium_tests:
     build: .
     container_name: selenium_tests
-    command: bash -c "cd app; python selenium_tests.py;"
+#    command: bash -c "cd app; python selenium_tests.py;"
     volumes:
       - /app/FTP:/app/FTP
     environment:

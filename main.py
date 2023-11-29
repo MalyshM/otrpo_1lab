@@ -36,6 +36,15 @@ templates = Jinja2Templates(directory="templates")
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/registration", response_class=HTMLResponse)
+def home(request: Request):
+    print(request)
+    return templates.TemplateResponse("registration.html", {"request": request})
+
+@app.get("/login", response_class=HTMLResponse)
+def home(request: Request):
+    print(request)
+    return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/pokemon", response_class=HTMLResponse)
 async def get_pokemon_a_lot(request: Request, offset: int = None, limit: int = None):
@@ -92,12 +101,7 @@ async def battle(request: Request, userPokemon: str, randomPokemon: str):
                                        "randomPokemon": response_list[1]})
 
 
-@app.post("/send-email")
-def send_email_route(email:Email):
-    print(email.to_email)
-    print(email.subject)
-    print(email.message)
-    return send_email(email.to_email, email.subject, email.message)
+
 
 
 # if __name__ == "__main__":

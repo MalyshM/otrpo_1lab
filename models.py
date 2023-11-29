@@ -14,12 +14,25 @@ Base = declarative_base()
 metadata = Base.metadata
 
 
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, server_default=text("nextval('users_id_seq'::regclass)"))
+    username = Column(String(255))
+    password = Column(String)
+    email = Column(String(255))
+    date_of_add = Column(DateTime)
+
+
 class PokemonBattle(Base):
     __tablename__ = 'pokemon_battle'
 
-    id = Column(Integer, primary_key=True, server_default=text("nextval('category_all_in_one_id_seq'::regclass)"))
+    id = Column(Integer, primary_key=True, server_default=text("nextval('pokemon_battle_id_seq'::regclass)"))
     data = Column(String(255))
-    date_of_round = Column(DateTime)
     user_pokemon = Column(String(255))
     computer_pokemon = Column(String(255))
     winner = Column(String(255))
+    date_of_round = Column(DateTime)
+    user_id = Column(ForeignKey('users.id', ondelete='CASCADE'), ForeignKey('users.id'))
+
+    user = relationship('User', primaryjoin='PokemonBattle.user_id == User.id')

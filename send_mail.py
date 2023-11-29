@@ -1,4 +1,6 @@
 import smtplib
+from email.mime.text import MIMEText
+from email.utils import formataddr
 
 
 def send_email(to_email: str, subject: str, message: str):
@@ -11,8 +13,13 @@ def send_email(to_email: str, subject: str, message: str):
         server.starttls()
         server.login(from_email, password)
 
-        email_body = f"Subject: {subject}\n\n{message}"
-        server.sendmail(from_email, to_email, email_body)
+        # Create the email message
+        msg = MIMEText(message, 'plain', 'utf-8')
+        msg['Subject'] = subject
+        msg['From'] = formataddr(("Your Name", from_email))
+        msg['To'] = to_email
+
+        server.sendmail(from_email, to_email, msg.as_string())
         server.quit()
 
         return {"message": "Email sent successfully"}
