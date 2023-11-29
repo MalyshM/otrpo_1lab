@@ -19,7 +19,7 @@ services:
     ports:
       - '8090:80'
 #      python create_db.py;
-    command: bash -c "uvicorn main:app --host 0.0.0.0 --port 80"
+    command: bash -c "python create_db.py; uvicorn main:app --host 0.0.0.0 --port 80"
     env_file:
       - .env
     volumes:
@@ -36,6 +36,14 @@ services:
     ports:
       - '6379:6379'
 
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - db
 
   ftp:
     build: .
@@ -78,5 +86,6 @@ services:
       - ftp
 volumes:
   app_data:
+  grafana_data:
 
 
