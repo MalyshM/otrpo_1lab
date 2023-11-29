@@ -355,8 +355,8 @@ async def login_standard(user: UserLogin, db=Depends(connect_db)):
 # Registration and login oauth2
 # region
 
-CLIENT_ID = "b76bebe769c746eba73e41f0c36ce4bc"  # Replace with your Yandex OAuth2 client ID
-CLIENT_SECRET = "1245567959c74acbb4588b2b60e32ab4"  # Replace with your Yandex OAuth2 client secret
+CLIENT_ID = "asdasdasd"  # Replace with your Yandex OAuth2 client ID
+CLIENT_SECRET = "asdasdasd"  # Replace with your Yandex OAuth2 client secret
 REDIRECT_URI = "https://oauth.yandex.ru/verification_code"  # Replace with your redirect URI
 AUTHORIZE_URL = "https://oauth.yandex.com/authorize"
 TOKEN_URL = "https://oauth.yandex.com/token"
