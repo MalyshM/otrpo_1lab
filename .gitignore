@@ -1,0 +1,5 @@
+/FTP
+/pgdata
+.env
+/*.env
+/__pycache__
