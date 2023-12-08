@@ -2,7 +2,7 @@ version: '3'
 
 services:
   db:
-    image: postgres
+    image: malyshm/postgres:v1.0
     restart: always
     environment:
       POSTGRES_USER: postgres
