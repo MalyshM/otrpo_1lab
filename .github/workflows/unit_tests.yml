@@ -10,7 +10,7 @@ permissions:
 
 env:
   TEST_TAG: malyshm/postgres:test
-  LATEST_TAG: malyshm/postgres:test
+  LATEST_TAG: malyshm/postgres:latest
 
 jobs:
   docker:
